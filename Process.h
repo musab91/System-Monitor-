@@ -1,10 +1,7 @@
 #include <string>
 
 using namespace std;
-/*
-Basic class for Process representation
-It contains relevant attributes as shown below
-*/
+
 class Process {
 private:
     string pid;
@@ -18,14 +15,9 @@ public:
     Process(string pid){
         this->pid = pid;
         this->user = ProcessParser::getProcUser(pid);
-        //TODOs:
-        //complete for mem
-      	this->mem = ProcessParser::getVmSize(pid);
-        //complete for cmd
+        this->mem = ProcessParser::getVmSize(pid);
         this->cmd = ProcessParser::getCmd(pid);
-        //complete for upTime
         this->upTime =  ProcessParser::getProcUpTime(pid);
-        //complete for cpu
         this->cpu = ProcessParser::getCpuPercent(pid);
     }
     void setPid(int pid);
@@ -50,6 +42,5 @@ string Process::getProcess(){
     this->upTime = ProcessParser::getProcUpTime(this->pid);
     this->cpu = ProcessParser::getCpuPercent(this->pid);
 
-    return (this->pid + "   " + this->user + "   " + this->mem + "   " + this->cpu+ "   " + this->upTime);
-            //TODO: finish the string! this->user + "   "+ mem...cpu...upTime...;
+    return (this->pid + "   " + this->user + "   " + this->mem + "   " + this->cpu + "   " + this->upTime) + "   " + this->cmd;       
 }

@@ -25,25 +25,24 @@ class ProcessParser{
 private:
     std::ifstream stream;
     public:
-    static string getCmd(string pid); //Done
-    static vector<string> getPidList(); //Done
-    static std::string getVmSize(string pid); //Done
-    static std::string getCpuPercent(string pid); //Done
-    static long int getSysUpTime(); //Done
-    static std::string getProcUpTime(string pid); //Done
-    static string getProcUser(string pid); //Done
-    static vector<string> getSysCpuPercent(string coreNumber = ""); //Done
-    static float getSysRamPercent(); //Done
-    static string getSysKernelVersion(); //Done
-    static int getTotalThreads(); //Done
-    static int getTotalNumberOfProcesses(); //Done
-    static int getNumberOfRunningProcesses(); //Done
-    static string getOSName(); //Dome
-    static std::string PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2); //Done
-    static bool isPidExisting(string pid); //Done
+    static string getCmd(string pid); 
+    static vector<string> getPidList();
+    static std::string getVmSize(string pid); 
+    static std::string getCpuPercent(string pid);
+    static long int getSysUpTime(); 
+    static std::string getProcUpTime(string pid); 
+    static string getProcUser(string pid); 
+    static vector<string> getSysCpuPercent(string coreNumber = ""); 
+    static float getSysRamPercent(); 
+    static string getSysKernelVersion(); 
+    static int getTotalThreads(); 
+    static int getTotalNumberOfProcesses(); 
+    static int getNumberOfRunningProcesses(); 
+    static string getOSName(); 
+    static std::string PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2); 
+    static bool isPidExisting(string pid); 
 };
 
-// TODO: Define all of the above functions below:
  string ProcessParser::getCmd(string pid){
    std::ifstream myStream;
    Util::getStream(Path::basePath() + pid + Path::cmdPath(), myStream);
@@ -67,8 +66,6 @@ string ProcessParser::getVmSize(string pid){
       string x;
       buf >> x >> result;
       result /= 1000;
-
-  
     }
   }
   return to_string(result);
@@ -94,9 +91,9 @@ std::string ProcessParser::getCpuPercent(string pid){
   float uptime = ProcessParser::getSysUpTime();
   float freq = sysconf(_SC_CLK_TCK);
 
-  float total_time = utime + stime + cutime + cstime + starttime;
+  float totalTime = utime + stime + cutime + cstime + starttime;
   float seconds = uptime - (starttime/freq);
-  float result = 100.0*((total_time/freq)/seconds);
+  float result = 100.0*((totalTime/freq)/seconds);
 
   return to_string(result);
 }
@@ -139,7 +136,6 @@ string ProcessParser::getProcUser(string pid){
       istream_iterator<string> beg(buf), end;
       vector<string> values(beg,end);
       userID = values[1];
-      //cout<<"The user ID is "<<userID<<endl;
       break;
     }
   }
@@ -158,22 +154,17 @@ string ProcessParser::getProcUser(string pid){
 
 vector<string> ProcessParser::getPidList(){
     DIR* dir;
-    // Basically, we are scanning /proc dir for all directories with numbers as their names
-    // If we get valid check we store dir names in vector as list of machine pids
     vector<string> container;
     if(!(dir = opendir("/proc")))
         throw std::runtime_error(std::strerror(errno));
 
     while (dirent* dirp = readdir(dir)) {
-        // is this a directory?
         if(dirp->d_type != DT_DIR)
             continue;
-        // Is every character of the name a digit?
         if (all_of(dirp->d_name, dirp->d_name + std::strlen(dirp->d_name), [](char c){ return std::isdigit(c); })) {
             container.push_back(dirp->d_name);
         }
     }
-    //Validating process of directory closing
     if(closedir(dir))
         throw std::runtime_error(std::strerror(errno));
     return container;
@@ -225,9 +216,6 @@ bool ProcessParser::isPidExisting(string pid){
 
 vector<string> ProcessParser::getSysCpuPercent(string coreNumber)
 {
-    // It is possible to use this method for selection of data for overall cpu or every core.
-    // when nothing is passed "cpu" line is read
-    // when, for example "0" is passed  -> "cpu0" -> data for first core is read
     string line;
     string name = "cpu" + coreNumber;
     string value;
@@ -239,7 +227,6 @@ vector<string> ProcessParser::getSysCpuPercent(string coreNumber)
             istringstream buf(line);
             istream_iterator<string> beg(buf), end;
             vector<string> values(beg, end);
-            // set of cpu data active and idle times;
             return values;
         }
     }
@@ -249,10 +236,10 @@ vector<string> ProcessParser::getSysCpuPercent(string coreNumber)
 string ProcessParser::PrintCpuStats(vector<string> values1, vector<string> values2)
 {
 
-    float active_time = getSysActiveCpuTime(values2)-getSysActiveCpuTime(values1);
-    float idle_time = getSysIdleCpuTime(values2) - getSysIdleCpuTime(values1);
-    float total_time = active_time + idle_time;
-    float result = 100.0*(active_time / total_time);
+    float activeTime = getSysActiveCpuTime(values2)-getSysActiveCpuTime(values1);
+    float idleTime = getSysIdleCpuTime(values2) - getSysIdleCpuTime(values1);
+    float totalTime = activeTime + idleTime;
+    float result = 100.0*(activeTime / totalTime);
     return to_string(result);
 }
 
@@ -268,23 +255,23 @@ float ProcessParser::getSysRamPercent()
     int result;
     ifstream stream;
   	Util::getStream((Path::basePath() + Path::memInfoPath()),stream);
-    float total_mem = 0;
-    float free_mem = 0;
+    float totalMem = 0;
+    float freeMem = 0;
     float buffers = 0;
     while (std::getline(stream, line)) {
-        if (total_mem != 0 && free_mem != 0)
+        if (totalMem != 0 && freeMem != 0)
             break;
         if (line.compare(0, name1.size(), name1) == 0) {
             istringstream buf(line);
             istream_iterator<string> beg(buf), end;
             vector<string> values(beg, end);
-            total_mem = stof(values[1]);
+            totalMem = stof(values[1]);
         }
         if (line.compare(0, name2.size(), name2) == 0) {
             istringstream buf(line);
             istream_iterator<string> beg(buf), end;
             vector<string> values(beg, end);
-            free_mem = stof(values[1]);
+            freeMem = stof(values[1]);
         }
         if (line.compare(0, name3.size(), name3) == 0) {
             istringstream buf(line);
@@ -293,8 +280,8 @@ float ProcessParser::getSysRamPercent()
             buffers = stof(values[1]);
         }
     }
-    //calculating usage:
-    return float(100.0*(1-(free_mem/(total_mem-buffers))));
+
+    return float(100.0*(1-(freeMem/(totalMem-buffers))));
 }
 
 string ProcessParser::getSysKernelVersion()
@@ -342,7 +329,6 @@ int ProcessParser::getTotalThreads(){
   	ifstream stream;
     for (int i=0 ; i<_list.size();i++) {
       string pid = _list[i];
-      //getting every process and reading their number of their threads
       Util::getStream((Path::basePath() + pid + Path::statusPath()), stream);
       while (std::getline(stream, line)) {
         if (line.compare(0, name.size(), name) == 0) {
